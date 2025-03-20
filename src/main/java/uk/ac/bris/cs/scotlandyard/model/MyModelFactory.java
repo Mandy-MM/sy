@@ -1,3 +1,4 @@
+
 package uk.ac.bris.cs.scotlandyard.model;
 
 import com.google.common.collect.ImmutableList;
@@ -43,6 +44,7 @@ public final class MyModelFactory implements Factory<Model> {
 
 		@Override
 		public void unregisterObserver(@Nonnull Observer observer) {
+			if (observer == null) throw new NullPointerException("Observer cannot be null");
 			if (!observers.contains(observer)) throw new IllegalArgumentException("Observer not found");
 			observers.remove(observer);
 		}
@@ -53,13 +55,17 @@ public final class MyModelFactory implements Factory<Model> {
 		}
 
 
+
 		@Override
 		public void chooseMove(@Nonnull Move move) {
-			System.out.println("Before move: " + gameState);
 			gameState = gameState.advance(move);
-			System.out.println("After move: " + gameState);
 
-			Model.Observer.Event event = gameState.getWinner().isEmpty() ? Model.Observer.Event.MOVE_MADE : Model.Observer.Event.GAME_OVER;
+			// 判断游戏是否结束
+			Model.Observer.Event event = gameState.getWinner().isEmpty()
+					? Model.Observer.Event.MOVE_MADE
+					: Model.Observer.Event.GAME_OVER;
+
+			// 通知所有 Observer
 			for (Observer observer : observers) {
 				observer.onModelChanged(gameState, event);
 			}
